@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Tienda Online</title>
+     <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-black via-blue-900 to-blue-700 text-blue-100 min-h-screen flex items-center justify-center">
+    <div class="login-container w-full max-w-sm mx-auto p-8 bg-black/70 rounded-xl shadow-lg">
+        <h2 class="text-3xl font-bold mb-6 text-center text-blue-200 drop-shadow">Iniciar Sesión</h2>
+        <form id="loginForm" class="space-y-4">
+            <input type="text" id="username" placeholder="Usuario o Email" required class="w-full border border-blue-700 bg-black/60 text-blue-100 rounded-lg px-3 py-2 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 placeholder-blue-400" />
+            <input type="password" id="password" placeholder="Contraseña" required class="w-full border border-blue-700 bg-black/60 text-blue-100 rounded-lg px-3 py-2 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 placeholder-blue-400" />
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-800 to-black text-blue-100 py-2 rounded-lg hover:bg-blue-900 hover:text-cyan-300 transition shadow-lg">Entrar</button>
+            <div class="error text-red-400 mt-2 text-center" id="errorMsg"></div>
+        </form>
+        <div class="mt-8">
+            <h3 class="text-xl font-semibold mb-2 text-blue-300 text-center">¿No tienes cuenta?</h3>
+            <form id="registerForm" class="space-y-3">
+                <input type="text" id="reg_nombre" placeholder="Nombre" required class="w-full border border-blue-700 bg-black/60 text-blue-100 rounded-lg px-3 py-2 placeholder-blue-400" />
+                <input type="email" id="reg_email" placeholder="Email" required class="w-full border border-blue-700 bg-black/60 text-blue-100 rounded-lg px-3 py-2 placeholder-blue-400" />
+                <input type="password" id="reg_password" placeholder="Contraseña" required class="w-full border border-blue-700 bg-black/60 text-blue-100 rounded-lg px-3 py-2 placeholder-blue-400" />
+                <button type="submit" class="w-full bg-gradient-to-r from-cyan-700 to-blue-900 text-blue-100 py-2 rounded-lg hover:bg-cyan-800 transition shadow">Registrarse</button>
+                <div class="text-green-400 mt-2 text-center" id="registerMsg"></div>
+            </form>
+        </div>
+        <button id="btn-catalogo" type="button" class="w-full mt-4 bg-gradient-to-r from-blue-700 to-blue-900 text-blue-100 py-2 rounded-lg hover:bg-blue-800 transition shadow">Mirar catálogo como invitado</button>
+    </div>
+    <script>
+
+        // Guarda el token en localStorage después de iniciar sesión correctamente
+        function guardarToken(user) {
+            localStorage.setItem('authToken', user.access_token);
+            localStorage.setItem('rol', user.user.rol);
+        }
+        // Listener para el formulario de login
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    const errorMsg = document.getElementById('errorMsg');
+                    errorMsg.textContent = '';
+
+                    try {
+                        const res = await fetch('http://127.0.0.1:8000/api/login', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email:username, password:password })
+                        });
+                        let data = {};
+                        let text = await res.text();
+                        try {
+                            data = JSON.parse(text);
+                        } catch (e) {
+                            data = {};
+                        }
+                        if (res.ok && data.access_token && data.user.rol === 'cliente') {
+                            guardarToken(data);
+                            window.location.href = 'index.html';
+                        } else if (res.ok && data.access_token && data.user.rol === 'admin') {
+                            guardarToken(data);
+                            window.location.href = 'indexadmin.html';
+                        } else if (res.status === 401 || res.status === 400) {
+                            errorMsg.textContent = data.message || 'Credenciales inválidas.';
+                        } else if (data.error) {
+                            errorMsg.textContent = data.error;
+                        } else {
+                            errorMsg.textContent = 'Credenciales inválidas';
+                        }
+                    } catch (err) {
+                        errorMsg.textContent = 'Error al conectar con el servidor.';
+                    }
+                });
+            }
+
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const nombre = document.getElementById('reg_nombre').value;
+                    const email = document.getElementById('reg_email').value;
+                    const password = document.getElementById('reg_password').value;
+                    const registerMsg = document.getElementById('registerMsg');
+                    registerMsg.textContent = '';
+
+                    try {
+                        const res = await fetch('http://127.0.0.1:8000/api/register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: nombre,
+                                email: email,
+                                password: password,
+                                password_confirmation: password // para validación Laravel
+                            })
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.user && data.user.id) {
+                            registerMsg.textContent = 'Registro exitoso. Puedes iniciar sesión.';
+                            registerForm.reset();
+                        } else if (data.error) {
+                            registerMsg.textContent = data.error;
+                        } else if (data.message) {
+                            registerMsg.textContent = data.message;
+                        } else {
+                            registerMsg.textContent = 'Error en el registro. Inténtalo de nuevo.';
+                        }
+                    } catch (err) {
+                        registerMsg.textContent = 'Error al conectar con el servidor.';
+                    }
+                });
+            }
+
+            document.getElementById('btn-catalogo').onclick = function() {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('rol');
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

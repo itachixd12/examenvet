@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - PetCare Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-900 text-white">
+    <!-- Header -->
+    <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl">🐾</div>
+                    <h1 class="text-xl font-bold text-emerald-400">PetCare Admin</h1>
+                </div>
+                <button onclick="logout()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm">Cerrar sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h2 class="text-3xl font-bold mb-8">📊 Reportes y Análisis</h2>
+
+        <!-- Estadísticas Generales -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                <p class="text-slate-400 text-sm">Citas Este Mes</p>
+                <p id="citasMes" class="text-4xl font-bold text-emerald-400">0</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                <p class="text-slate-400 text-sm">Citas Completadas</p>
+                <p id="citasCompletadas" class="text-4xl font-bold text-blue-400">0</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-lg border border-slate-700">
+                <p class="text-slate-400 text-sm">Clientes Totales</p>
+                <p id="clientesTotales" class="text-4xl font-bold text-purple-400">0</p>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Servicios más solicitados -->
+            <div class="bg-slate-800 rounded-lg border border-slate-700 p-6">
+                <h3 class="text-xl font-bold mb-4">Servicios Más Solicitados</h3>
+                <canvas id="chartServicios"></canvas>
+            </div>
+
+            <!-- Ocupación por Veterinario -->
+            <div class="bg-slate-800 rounded-lg border border-slate-700 p-6">
+                <h3 class="text-xl font-bold mb-4">Ocupación por Veterinario</h3>
+                <canvas id="chartOcupacion"></canvas>
+            </div>
+        </div>
+
+        <!-- Tabla de Ocupación Detallada -->
+        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+            <div class="p-6 border-b border-slate-700">
+                <h3 class="text-xl font-bold">Detalle de Ocupación</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-700 border-b border-slate-600">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Veterinario</th>
+                            <th class="px-4 py-3 text-left">Citas Totales</th>
+                            <th class="px-4 py-3 text-left">Completadas</th>
+                            <th class="px-4 py-3 text-left">% Ocupación</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaOcupacion" class="divide-y divide-slate-700">
+                        <tr class="bg-slate-800">
+                            <td colspan="4" class="px-4 py-8 text-center text-slate-400">Cargando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('authToken');
+        let chartServicios, chartOcupacion;
+
+        async function cargarEstadisticas() {
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/admin/reportes/estadisticas', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (resp.ok) {
+                    const datos = await resp.json();
+                    document.getElementById('citasMes').textContent = datos.citas_mes || 0;
+                    document.getElementById('citasCompletadas').textContent = datos.citas_completadas || 0;
+                    document.getElementById('clientesTotales').textContent = datos.clientes_totales || 0;
+                }
+            } catch (error) {
+                console.error('Error al cargar estadísticas:', error);
+            }
+        }
+
+        async function cargarOcupacion() {
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/admin/reportes/ocupacion', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (resp.ok) {
+                    const datos = await resp.json();
+                    mostrarOcupacion(datos);
+                }
+            } catch (error) {
+                console.error('Error al cargar ocupación:', error);
+            }
+        }
+
+        async function cargarServicios() {
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/admin/reportes/servicios', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (resp.ok) {
+                    const datos = await resp.json();
+                    mostrarServicios(datos);
+                }
+            } catch (error) {
+                console.error('Error al cargar servicios:', error);
+            }
+        }
+
+        function mostrarOcupacion(datos) {
+            const tabla = document.getElementById('tablaOcupacion');
+            tabla.innerHTML = '';
+
+            if (datos.length === 0) {
+                tabla.innerHTML = '<tr class="bg-slate-800"><td colspan="4" class="px-4 py-8 text-center text-slate-400">No hay datos de ocupación</td></tr>';
+                return;
+            }
+
+            const etiquetas = [];
+            const citas = [];
+            const completadas = [];
+
+            datos.forEach(item => {
+                etiquetas.push(item.veterinario || 'Sin asignar');
+                citas.push(item.total);
+                completadas.push(item.completadas);
+
+                const porcentaje = item.total > 0 ? Math.round((item.completadas / item.total) * 100) : 0;
+                const fila = document.createElement('tr');
+                fila.className = 'bg-slate-800 hover:bg-slate-700 transition';
+                fila.innerHTML = `
+                    <td class="px-4 py-3 font-semibold">${item.veterinario || 'Sin asignar'}</td>
+                    <td class="px-4 py-3">${item.total}</td>
+                    <td class="px-4 py-3">${item.completadas}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-32 bg-slate-700 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: ${porcentaje}%"></div>
+                            </div>
+                            <span class="text-sm">${porcentaje}%</span>
+                        </div>
+                    </td>
+                `;
+                tabla.appendChild(fila);
+            });
+
+            // Actualizar gráfico de ocupación
+            if (chartOcupacion) {
+                chartOcupacion.destroy();
+            }
+
+            const ctxOcupacion = document.getElementById('chartOcupacion').getContext('2d');
+            chartOcupacion = new Chart(ctxOcupacion, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [
+                        {
+                            label: 'Total de Citas',
+                            data: citas,
+                            backgroundColor: 'rgba(34, 197, 94, 0.5)',
+                            borderColor: 'rgba(34, 197, 94, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Completadas',
+                            data: completadas,
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true, labels: { color: '#cbd5e1' } }
+                    },
+                    scales: {
+                        y: { 
+                            ticks: { color: '#cbd5e1' },
+                            grid: { color: '#334155' }
+                        },
+                        x: { 
+                            ticks: { color: '#cbd5e1' },
+                            grid: { color: '#334155' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function mostrarServicios(datos) {
+            const etiquetas = [];
+            const totales = [];
+            const colores = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+
+            datos.forEach((item, index) => {
+                etiquetas.push(item.servicio || 'Sin especificar');
+                totales.push(item.total);
+            });
+
+            if (chartServicios) {
+                chartServicios.destroy();
+            }
+
+            const ctxServicios = document.getElementById('chartServicios').getContext('2d');
+            chartServicios = new Chart(ctxServicios, {
+                type: 'doughnut',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        data: totales,
+                        backgroundColor: colores.slice(0, etiquetas.length),
+                        borderColor: '#1e293b',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            labels: { color: '#cbd5e1', padding: 15 }
+                        }
+                    }
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = 'login.html';
+        }
+
+        // Cargar todo al iniciar
+        window.addEventListener('load', async () => {
+            await cargarEstadisticas();
+            await cargarOcupacion();
+            await cargarServicios();
+        });
+    </script>
+</body>
+</html>

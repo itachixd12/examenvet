@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - PetCare Clínica Veterinaria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Mapbox GL CSS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 0.75rem;
+        }
+        .mapboxgl-popup-content {
+            background-color: #0f172a;
+            border: 2px solid #059669;
+            color: #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 12px;
+        }
+        .mapboxgl-popup-close-button {
+            color: #10b981;
+            font-size: 20px;
+        }
+        .mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+            border-top-color: #059669;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-b from-slate-950 via-emerald-900 to-teal-800 text-slate-100 min-h-screen">
+    <header class="flex justify-between items-center m-8 bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 rounded-xl shadow-lg p-6 border border-emerald-700">
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">🏥</span>
+            <h1 class="text-4xl font-bold text-emerald-300 drop-shadow-lg">PetCare</h1>
+        </div>
+        <nav id="menu" class="hidden md:flex md:items-center md:space-x-4">
+            <ul class="flex space-x-4">
+                <li><a href="index.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Inicio</a></li>
+                <li><a href="mascotas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Mis Mascotas</a></li>
+                <li><a href="citas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Agendar Cita</a></li>
+                <li><a href="contacto.html" class="text-emerald-300 font-semibold">Contacto</a></li>
+            </ul>
+            <button onclick="logout()"
+                class="ml-6 px-4 py-2 bg-gradient-to-r from-red-700 to-red-900 text-white rounded hover:bg-red-800 transition shadow-lg">
+                Cerrar sesión
+            </button>
+            <script>
+                function logout() {
+                    const token = localStorage.getItem('authToken');
+                    if (token) {
+                        fetch('http://127.0.0.1:8000/api/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            }
+                        })
+                        .finally(() => {
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('rol');
+                            window.location.href = 'login.html';
+                        });
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                }
+            </script>
+        </nav>
+    </header>
+
+    <main class="flex flex-col items-center justify-center py-8 mb-9">
+        <!-- Información de Contacto -->
+        <section class="mb-8 bg-slate-900/80 border border-emerald-600 rounded-xl shadow-lg p-8 w-full max-w-3xl">
+            <h2 class="text-4xl font-bold mb-4 text-emerald-300 drop-shadow">Contáctanos</h2>
+            <p class="text-xl text-emerald-200 mb-6">Clínica Veterinaria PetCare - Cuidamos de tus mascotas</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">📍 Dirección</p>
+                    <p class="text-slate-200">Calle Principal 123, Sector Centro</p>
+                    <p class="text-slate-200">Sangolqui, Pichincha</p>
+                </div>
+
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">📧 Email</p>
+                    <p class="text-slate-200">info@petcare.com</p>
+                    <p class="text-slate-200">emergencias@petcare.com</p>
+                </div>
+
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">📞 Teléfono</p>
+                    <p class="text-slate-200">0992892379</p>
+                    <p class="text-slate-200">0960790067 (Emergencias)</p>
+                </div>
+
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">🕒 Horario de Atención</p>
+                    <p class="text-slate-200">Lun-Vie: 08:00 - 19:00</p>
+                    <p class="text-slate-200">Sáb-Dom: 09:00 - 17:00</p>
+                </div>
+            </div>
+
+            <!-- Formulario de Contacto -->
+            <hr class="my-8 border-emerald-700">
+            
+            <h3 class="text-2xl font-bold text-emerald-300 mb-4">Envíanos un Mensaje</h3>
+            <form id="form-contacto" class="space-y-4">
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Nombre</label>
+                    <input type="text" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Email</label>
+                    <input type="email" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Asunto</label>
+                    <input type="text" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Mensaje</label>
+                    <textarea required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500" rows="5"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-bold text-lg">
+                    Enviar Mensaje
+                </button>
+            </form>
+        </section>
+
+        <!-- Mapa Mapbox -->
+        <section class="w-full max-w-3xl mt-8">
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-xl shadow-lg p-6 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-emerald-300">📍 Ubicación de la Clínica</h3>
+                    <button id="localizarBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors">
+                        📍 Mi Ubicación
+                    </button>
+                </div>
+                <div id="map" class="shadow-lg rounded-lg border border-emerald-600"></div>
+                <p class="text-slate-300 mt-4 text-center text-sm">Haz clic en el marcador para ver más información • Arrastra el mapa para explorar • Usa el botón para tu ubicación</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 text-slate-300 py-6 mt-12 px-6 rounded-t-xl shadow-lg text-center border-t border-emerald-700">
+        <p class="mb-2">PetCare - Tu clínica veterinaria de confianza</p>
+        <p>&copy; 2025 Todos los derechos reservados</p>
+    </footer>
+
+    <!-- Mapbox GL JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    
+    <script>
+        // Esperar a que el DOM esté listo y que Mapbox esté cargado
+        function initMap() {
+            console.log('Inicializando mapa...');
+            
+            // Configurar token de Mapbox
+            mapboxgl.accessToken = 'pk.eyJ1IjoiZXJpY2tzdGV2ZW4xNyIsImEiOiJjbWl6M25jcjgwbTJ4M2tweTJ5dXEzc29iIn0.gCKA1vCnL0A1rY2qSL3uqQ';
+            
+            // Crear mapa
+            const map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v12',
+                center: [-78.1834, -0.3522], // Coordenadas de Sangolqui, Pichincha
+                zoom: 14,
+                pitch: 0,
+                bearing: 0,
+                drag: true,
+                dragRotate: true
+            });
+
+            // Variable para almacenar el marcador de ubicación del usuario
+            let userMarker = null;
+
+            // Esperar a que el mapa esté cargado
+            map.on('load', function() {
+                console.log('Mapa cargado correctamente');
+
+                // Agregar control de navegación
+                map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+                // Crear marcador personalizado para la clínica
+                const markerElement = document.createElement('div');
+                markerElement.style.width = '40px';
+                markerElement.style.height = '40px';
+                markerElement.style.backgroundImage = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2232%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22%3E🏥%3C/text%3E%3C/svg%3E")';
+                markerElement.style.backgroundSize = '100%';
+                markerElement.style.cursor = 'pointer';
+
+                // Crear popup con información de la clínica
+                const popup = new mapboxgl.Popup({ offset: 25, closeOnClick: false })
+                    .setHTML(`
+                        <div style="text-align: center; padding: 8px;">
+                            <h3 style="font-weight: bold; font-size: 16px; color: #10b981; margin-bottom: 8px;">🏥 PetCare Clínica Veterinaria</h3>
+                            <p style="font-size: 13px; margin: 4px 0; color: #cbd5e1;">Calle Principal 123</p>
+                            <p style="font-size: 13px; margin: 4px 0; color: #cbd5e1;">Sangolqui, Pichincha</p>
+                            <p style="font-size: 13px; margin: 8px 0; font-weight: bold; color: #059669;">📞 +593 2 XXXX-XXXX</p>
+                            <p style="font-size: 12px; margin: 4px 0; color: #cbd5e1;">Lun-Vie: 08:00 - 19:00</p>
+                            <p style="font-size: 12px; margin: 4px 0; color: #cbd5e1;">Sáb-Dom: 09:00 - 17:00</p>
+                        </div>
+                    `);
+
+                // Agregar marcador de la clínica
+                const marker = new mapboxgl.Marker(markerElement)
+                    .setLngLat([-78.1834, -0.3522])
+                    .setPopup(popup)
+                    .addTo(map);
+
+                // Hacer el marcador interactivo
+                marker.getElement().addEventListener('click', function() {
+                    marker.togglePopup();
+                });
+
+                // Mostrar popup al cargar
+                marker.togglePopup();
+
+                // Función para calcular distancia
+                function calcularDistancia(lat1, lon1, lat2, lon2) {
+                    const R = 6371;
+                    const dLat = (lat2 - lat1) * Math.PI / 180;
+                    const dLon = (lon2 - lon1) * Math.PI / 180;
+                    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    return R * c;
+                }
+
+                // Función para obtener ubicación
+                function getUserLocation() {
+                    console.log('Obteniendo ubicación...');
+                    const btn = document.getElementById('localizarBtn');
+                    
+                    if (!navigator.geolocation) {
+                        console.error('Geolocalización no soportada');
+                        alert('Tu navegador no soporta geolocalización.');
+                        return;
+                    }
+
+                    btn.textContent = '🔄 Localizando...';
+                    btn.disabled = true;
+
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            console.log('Ubicación obtenida:', position.coords);
+                            const userLat = position.coords.latitude;
+                            const userLng = position.coords.longitude;
+
+                            // Animar el mapa a la nueva ubicación
+                            map.flyTo({
+                                center: [userLng, userLat],
+                                zoom: 15,
+                                duration: 2000
+                            });
+
+                            // Eliminar marcador anterior
+                            if (userMarker) {
+                                userMarker.remove();
+                            }
+
+                            // Crear nuevo marcador de usuario
+                            const userMarkerElement = document.createElement('div');
+                            userMarkerElement.style.width = '40px';
+                            userMarkerElement.style.height = '40px';
+                            userMarkerElement.style.backgroundImage = 'url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2216%22 fill=%22%233399ff%22 opacity=%220.3%22/%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%228%22 fill=%22%233399ff%22 stroke=%22white%22 stroke-width=%222%22/%3E%3C/svg%3E")';
+                            userMarkerElement.style.backgroundSize = '100%';
+                            userMarkerElement.style.cursor = 'pointer';
+
+                            const distancia = calcularDistancia(userLat, userLng, -0.3522, -78.1834);
+
+                            const userPopup = new mapboxgl.Popup({ offset: 25 })
+                                .setHTML(`
+                                    <div style="text-align: center; padding: 8px;">
+                                        <h3 style="font-weight: bold; font-size: 14px; color: #3399ff; margin-bottom: 8px;">📍 Tu Ubicación</h3>
+                                        <p style="font-size: 12px; margin: 4px 0; color: #cbd5e1;">Lat: ${userLat.toFixed(4)}</p>
+                                        <p style="font-size: 12px; margin: 4px 0; color: #cbd5e1;">Lng: ${userLng.toFixed(4)}</p>
+                                        <p style="font-size: 11px; margin-top: 8px; color: #10b981; font-weight: bold;">📏 ${distancia.toFixed(2)} km a la clínica</p>
+                                    </div>
+                                `);
+
+                            userMarker = new mapboxgl.Marker(userMarkerElement)
+                                .setLngLat([userLng, userLat])
+                                .setPopup(userPopup)
+                                .addTo(map);
+
+                            userMarker.togglePopup();
+
+                            btn.textContent = '📍 Mi Ubicación (Activa)';
+                            btn.disabled = false;
+                            console.log('Marcador agregado en:', userLat, userLng);
+                        },
+                        function(error) {
+                            console.error('Error de geolocalización:', error);
+                            let mensaje = 'Error al obtener ubicación: ';
+                            
+                            switch(error.code) {
+                                case error.PERMISSION_DENIED:
+                                    mensaje += 'Permiso denegado. Habilita la ubicación en tu navegador.';
+                                    break;
+                                case error.POSITION_UNAVAILABLE:
+                                    mensaje += 'Ubicación no disponible.';
+                                    break;
+                                case error.TIMEOUT:
+                                    mensaje += 'Tiempo de espera agotado.';
+                                    break;
+                                default:
+                                    mensaje += error.message;
+                            }
+                            
+                            alert(mensaje);
+                            btn.textContent = '📍 Mi Ubicación';
+                            btn.disabled = false;
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 15000,
+                            maximumAge: 0
+                        }
+                    );
+                }
+
+                // Agregar evento al botón cuando esté disponible
+                const localizarBtn = document.getElementById('localizarBtn');
+                if (localizarBtn) {
+                    console.log('Botón encontrado, agregando listener');
+                    localizarBtn.addEventListener('click', getUserLocation);
+                } else {
+                    console.error('Botón con id localizarBtn no encontrado');
+                }
+
+                // Hacer el mapa responsivo
+                window.addEventListener('resize', function() {
+                    map.resize();
+                });
+            });
+
+            // Manejo de errores del mapa
+            map.on('error', function(e) {
+                console.error('Error del mapa:', e);
+            });
+        }
+
+        // Esperar a que el DOM esté completamente cargado
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMap);
+        } else {
+            initMap();
+        }
+    </script>
+   
+</body>
+
+</html>

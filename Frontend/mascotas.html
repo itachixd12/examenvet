@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Mascotas - PetCare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-slate-950 via-emerald-900 to-teal-800 text-slate-100 min-h-screen">
+    <header class="flex justify-between items-center m-8 bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 rounded-xl shadow-lg p-6 border border-emerald-700">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">🏥</span>
+            <h1 class="text-3xl font-bold text-emerald-300 drop-shadow-lg">PetCare</h1>
+        </div>
+        <nav class="hidden md:flex md:items-center md:space-x-4">
+            <ul class="flex space-x-4">
+                <li><a href="index.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Inicio</a></li>
+                <li><a href="mascotas.html" class="text-emerald-300 font-semibold">Mis Mascotas</a></li>
+                <li><a href="citas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Agendar Cita</a></li>
+                <li><a href="contacto.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Contacto</a></li>
+            </ul>
+            <button onclick="logout()" class="ml-6 px-4 py-2 bg-gradient-to-r from-red-700 to-red-900 text-white rounded hover:bg-red-800 transition shadow-lg">Cerrar sesión</button>
+        </nav>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-4xl font-bold text-emerald-300 drop-shadow">Mis Mascotas</h2>
+            <button id="btn-agregar-mascota" class="bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-bold">
+                + Agregar Mascota
+            </button>
+        </div>
+
+        <!-- Modal Agregar Mascota -->
+        <div id="modal-agregar" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+            <div class="bg-slate-900 border border-emerald-600 rounded-lg p-8 max-w-md w-full shadow-2xl">
+                <h3 class="text-2xl font-bold text-emerald-300 mb-6">Registrar Nueva Mascota</h3>
+                <form id="form-mascota" class="space-y-4">
+                    <div>
+                        <label class="block text-slate-300 mb-2 font-semibold">Nombre</label>
+                        <input type="text" id="nombre" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-2 font-semibold">Especie</label>
+                        <select id="especie" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                            <option value="">Seleccionar</option>
+                            <option value="Perro">Perro</option>
+                            <option value="Gato">Gato</option>
+                            <option value="Conejo">Conejo</option>
+                            <option value="Hamster">Hamster</option>
+                            <option value="Ave">Ave</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-2 font-semibold">Raza</label>
+                        <input type="text" id="raza" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-slate-300 mb-2 font-semibold">Edad (años)</label>
+                            <input type="number" id="edad" min="0" step="0.1" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 mb-2 font-semibold">Peso (kg)</label>
+                            <input type="number" id="peso" min="0" step="0.1" class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-2 font-semibold">Foto</label>
+                        <button type="button" id="btn-foto" class="w-full px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-semibold">Elegir archivo</button>
+                        <input type="file" id="foto-archivo" accept="image/*" class="hidden">
+                        <div id="estado-carga" class="hidden mt-2 px-4 py-2 bg-slate-700 rounded text-slate-300 text-center">
+                            <span class="animate-spin">⏳ Subiendo...</span>
+                        </div>
+                        <input type="hidden" id="foto">
+                        <p id="nombre-archivo" class="text-slate-400 text-sm mt-2"></p>
+                    </div>
+                    <div>
+                        <label class="block text-slate-300 mb-2 font-semibold">Notas especiales</label>
+                        <textarea id="notas" class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500" rows="3"></textarea>
+                    </div>
+                    <div class="flex gap-4 mt-6">
+                        <button type="button" onclick="cerrarModalMascota()" class="flex-1 px-4 py-2 bg-slate-700 text-white rounded hover:bg-slate-600 transition">Cancelar</button>
+                        <button type="submit" class="flex-1 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition font-bold">Guardar Mascota</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Mascotas -->
+        <div id="mascotas-contenedor" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="text-slate-400 col-span-full text-center py-8">Cargando mascotas...</p>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 text-slate-300 py-6 mt-12 px-6 rounded-t-xl shadow-lg text-center border-t border-emerald-700">
+        <p class="mb-2">PetCare - Tu clínica veterinaria de confianza</p>
+        <p>&copy; 2025 Todos los derechos reservados</p>
+    </footer>
+
+    <!-- Scripts de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <!-- Configuración de Firebase -->
+    <script src="firebase-config.js"></script>
+    <!-- Script de la aplicación -->
+    <script src="mascotas.js"></script>
+    <script>
+        function logout() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                fetch('http://127.0.0.1:8000/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .finally(() => {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('rol');
+                    window.location.href = 'login.html';
+                });
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

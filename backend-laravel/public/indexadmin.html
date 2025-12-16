@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - PetCare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-slate-950 via-emerald-900 to-teal-800 text-slate-100 min-h-screen">
+    <script>
+        if (!localStorage.getItem('authToken') || localStorage.getItem('rol') !== 'admin') {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <header class="flex justify-between items-center m-8 bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 rounded-xl shadow-lg p-6 border border-emerald-700">
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">🏥</span>
+            <h1 class="text-4xl font-bold text-emerald-300 drop-shadow-lg">PetCare Admin</h1>
+        </div>
+        <nav id="menu" class="hidden md:flex md:items-center md:space-x-4">
+            <ul class="flex space-x-4">
+                <li><a href="admin-dashboard.html" class="text-emerald-300 font-semibold">Dashboard</a></li>
+                <li><a href="admin-citas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Gestionar Citas</a></li>
+                <li><a href="admin-mascotas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Mascotas</a></li>
+                <li><a href="admin-veterinarios.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Veterinarios</a></li>
+                <li><a href="admin-reportes.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Reportes</a></li>
+            </ul>
+            <button onclick="logout()"
+                class="ml-6 px-4 py-2 bg-gradient-to-r from-red-700 to-red-900 text-white rounded hover:bg-red-800 transition shadow-lg">
+                Cerrar sesión
+            </button>
+            <script>
+                function logout() {
+                    const token = localStorage.getItem('authToken');
+                    if (token) {
+                        fetch('http://127.0.0.1:8000/api/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            }
+                        })
+                        .finally(() => {
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('rol');
+                            window.location.href = 'login.html';
+                        });
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                }
+            </script>
+        </nav>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-12">
+        <!-- Encabezado del Dashboard -->
+        <div class="mb-12">
+            <h2 class="text-5xl font-bold text-emerald-300 drop-shadow mb-2">Panel Administrativo</h2>
+            <p class="text-slate-300 text-lg">Gestión integral de la clínica veterinaria PetCare</p>
+        </div>
+
+        <!-- Estadísticas principales -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <!-- Citas del día -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 hover:shadow-emerald-500/50 transition shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-sm font-semibold">Citas de Hoy</p>
+                        <p id="citas-hoy" class="text-4xl font-bold text-emerald-300 mt-2">0</p>
+                    </div>
+                    <span class="text-5xl">📅</span>
+                </div>
+            </div>
+
+            <!-- Mascotas registradas -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 hover:shadow-emerald-500/50 transition shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-sm font-semibold">Mascotas Registradas</p>
+                        <p id="total-mascotas" class="text-4xl font-bold text-emerald-300 mt-2">0</p>
+                    </div>
+                    <span class="text-5xl">🐾</span>
+                </div>
+            </div>
+
+            <!-- Clientes activos -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 hover:shadow-emerald-500/50 transition shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-sm font-semibold">Clientes Activos</p>
+                        <p id="clientes-activos" class="text-4xl font-bold text-emerald-300 mt-2">0</p>
+                    </div>
+                    <span class="text-5xl">👥</span>
+                </div>
+            </div>
+
+            <!-- Veterinarios disponibles -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 hover:shadow-emerald-500/50 transition shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-slate-400 text-sm font-semibold">Veterinarios</p>
+                        <p id="veterinarios-total" class="text-4xl font-bold text-emerald-300 mt-2">0</p>
+                    </div>
+                    <span class="text-5xl">👨‍⚕️</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secciones de administración -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <!-- Gestión de Citas -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-4xl">📋</span>
+                    <h3 class="text-2xl font-bold text-emerald-300">Gestionar Citas</h3>
+                </div>
+                <p class="text-slate-300 mb-4">Administra todas las citas veterinarias, asignaciones de veterinarios y estados.</p>
+                <a href="admin-citas.html" class="inline-block bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700 transition font-semibold">
+                    Ir a Citas
+                </a>
+            </div>
+
+            <!-- Mascotas y Pacientes -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-4xl">🐕</span>
+                    <h3 class="text-2xl font-bold text-emerald-300">Mascotas Pacientes</h3>
+                </div>
+                <p class="text-slate-300 mb-4">Accede al registro completo de todas las mascotas y sus historiales médicos.</p>
+                <a href="admin-mascotas.html" class="inline-block bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700 transition font-semibold">
+                    Ver Mascotas
+                </a>
+            </div>
+
+            <!-- Gestión de Veterinarios -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-4xl">👨‍⚕️</span>
+                    <h3 class="text-2xl font-bold text-emerald-300">Personal Veterinario</h3>
+                </div>
+                <p class="text-slate-300 mb-4">Gestiona veterinarios, horarios disponibles y asignaciones.</p>
+                <a href="admin-veterinarios.html" class="inline-block bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700 transition font-semibold">
+                    Administrar
+                </a>
+            </div>
+
+            <!-- Reportes -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="text-4xl">📊</span>
+                    <h3 class="text-2xl font-bold text-emerald-300">Reportes</h3>
+                </div>
+                <p class="text-slate-300 mb-4">Visualiza estadísticas, análisis de ocupación y reportes de servicios.</p>
+                <a href="admin-reportes.html" class="inline-block bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700 transition font-semibold">
+                    Ver Reportes
+                </a>
+            </div>
+        </div>
+
+        <!-- Citas próximas -->
+        <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-8">
+            <h3 class="text-2xl font-bold text-emerald-300 mb-6">Citas Próximas</h3>
+            <div id="citas-proximas" class="space-y-3">
+                <p class="text-slate-400 text-center py-8">Cargando citas...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 text-slate-300 py-6 mt-12 px-6 rounded-t-xl shadow-lg text-center border-t border-emerald-700">
+        <p class="mb-2">PetCare - Tu clínica veterinaria de confianza</p>
+        <p>&copy; 2025 Todos los derechos reservados</p>
+    </footer>
+
+    <script src="admin-dashboard.js"></script>

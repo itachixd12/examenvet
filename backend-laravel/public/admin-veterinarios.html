@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Veterinario - PetCare Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white">
+    <!-- Header -->
+    <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl">🐾</div>
+                    <h1 class="text-xl font-bold text-emerald-400">PetCare Admin</h1>
+                </div>
+                <button onclick="logout()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm">Cerrar sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Titulo y Acción -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold">👨‍⚕️ Personal Veterinario</h2>
+            <button onclick="abrirModalNuevo()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded font-semibold">+ Nuevo Veterinario</button>
+        </div>
+
+        <!-- Tabla de Veterinarios -->
+        <div class="bg-slate-800 rounded-lg border border-slate-700 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-slate-700 border-b border-slate-600">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Nombre</th>
+                            <th class="px-4 py-3 text-left">Especialidad</th>
+                            <th class="px-4 py-3 text-left">Email</th>
+                            <th class="px-4 py-3 text-left">Teléfono</th>
+                            <th class="px-4 py-3 text-left">Horario</th>
+                            <th class="px-4 py-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaVeterinarios" class="divide-y divide-slate-700">
+                        <tr class="bg-slate-800">
+                            <td colspan="6" class="px-4 py-8 text-center text-slate-400">Cargando veterinarios...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear/Editar Veterinario -->
+    <div id="modalVeterinario" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center">
+        <div class="bg-slate-800 rounded-lg p-6 w-full max-w-md border border-slate-700">
+            <h3 id="modalTitulo" class="text-2xl font-bold mb-4">Nuevo Veterinario</h3>
+            <form id="formVeterinario" onsubmit="guardarVeterinario(event)" class="space-y-4">
+                <input type="hidden" id="editarId">
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Nombre *</label>
+                    <input type="text" id="nombre" required class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Especialidad *</label>
+                    <input type="text" id="especialidad" placeholder="Ej: Cirugía, Odontología..." required class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Teléfono</label>
+                    <input type="text" id="telefono" class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1">Horario (Ej: Lun-Vie 8:00-17:00)</label>
+                    <input type="text" id="horario" class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                </div>
+
+                <div class="flex gap-2 pt-4">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded font-semibold">Guardar</button>
+                    <button type="button" onclick="cerrarModal()" class="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let veterinariosActuales = [];
+        const token = localStorage.getItem('authToken');
+
+        function cerrarModal() {
+            document.getElementById('modalVeterinario').classList.remove('active');
+            document.getElementById('formVeterinario').reset();
+            document.getElementById('editarId').value = '';
+        }
+
+        function abrirModalNuevo() {
+            document.getElementById('modalTitulo').textContent = 'Nuevo Veterinario';
+            document.getElementById('editarId').value = '';
+            document.getElementById('formVeterinario').reset();
+            document.getElementById('modalVeterinario').classList.add('active');
+        }
+
+        function editarVeterinario(id) {
+            const vet = veterinariosActuales.find(v => v.id === id);
+            if (!vet) return;
+
+            document.getElementById('modalTitulo').textContent = 'Editar Veterinario';
+            document.getElementById('editarId').value = vet.id;
+            document.getElementById('nombre').value = vet.nombre;
+            document.getElementById('especialidad').value = vet.especialidad;
+            document.getElementById('email').value = vet.email || '';
+            document.getElementById('telefono').value = vet.telefono || '';
+            document.getElementById('horario').value = vet.horario || '';
+
+            document.getElementById('modalVeterinario').classList.add('active');
+        }
+
+        async function guardarVeterinario(e) {
+            e.preventDefault();
+            const id = document.getElementById('editarId').value;
+
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                especialidad: document.getElementById('especialidad').value,
+                email: document.getElementById('email').value || null,
+                telefono: document.getElementById('telefono').value || null,
+                horario: document.getElementById('horario').value || null
+            };
+
+            try {
+                const url = id 
+                    ? `http://127.0.0.1:8000/api/admin/veterinarios/${id}`
+                    : 'http://127.0.0.1:8000/api/admin/veterinarios-crear';
+                
+                const metodo = id ? 'PUT' : 'POST';
+
+                const resp = await fetch(url, {
+                    method: metodo,
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                if (resp.ok) {
+                    alert(id ? '✓ Veterinario actualizado' : '✓ Veterinario creado');
+                    cerrarModal();
+                    cargarVeterinarios();
+                } else {
+                    alert('Error al guardar veterinario');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        }
+
+        async function eliminarVeterinario(id) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este veterinario?')) return;
+
+            try {
+                const resp = await fetch(`http://127.0.0.1:8000/api/admin/veterinarios/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (resp.ok) {
+                    alert('✓ Veterinario eliminado');
+                    cargarVeterinarios();
+                } else {
+                    alert('Error al eliminar veterinario');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function mostrarVeterinarios() {
+            const tabla = document.getElementById('tablaVeterinarios');
+            tabla.innerHTML = '';
+
+            if (veterinariosActuales.length === 0) {
+                tabla.innerHTML = '<tr class="bg-slate-800"><td colspan="6" class="px-4 py-8 text-center text-slate-400">No hay veterinarios registrados</td></tr>';
+                return;
+            }
+
+            veterinariosActuales.forEach(vet => {
+                const fila = document.createElement('tr');
+                fila.className = 'bg-slate-800 hover:bg-slate-700 transition';
+                fila.innerHTML = `
+                    <td class="px-4 py-3 font-semibold">${vet.nombre}</td>
+                    <td class="px-4 py-3">${vet.especialidad}</td>
+                    <td class="px-4 py-3 text-sm">${vet.email || '-'}</td>
+                    <td class="px-4 py-3 text-sm">${vet.telefono || '-'}</td>
+                    <td class="px-4 py-3 text-sm">${vet.horario || '-'}</td>
+                    <td class="px-4 py-3 text-center space-x-2">
+                        <button onclick="editarVeterinario(${vet.id})" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-sm">✏️ Editar</button>
+                        <button onclick="eliminarVeterinario(${vet.id})" class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm">🗑️ Eliminar</button>
+                    </td>
+                `;
+                tabla.appendChild(fila);
+            });
+        }
+
+        async function cargarVeterinarios() {
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/admin/veterinarios-list', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (resp.ok) {
+                    const result = await resp.json();
+                    veterinariosActuales = result.data || result;
+                    mostrarVeterinarios();
+                } else {
+                    document.getElementById('tablaVeterinarios').innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-red-400">Error al cargar veterinarios</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error al cargar veterinarios:', error);
+                document.getElementById('tablaVeterinarios').innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-red-400">Error de conexión</td></tr>';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = 'login.html';
+        }
+
+        window.addEventListener('load', cargarVeterinarios);
+    </script>
+</body>
+</html>

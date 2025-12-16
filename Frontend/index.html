@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetCare - Clínica Veterinaria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gradient-to-b from-slate-950 via-emerald-900 to-teal-800 text-slate-100 min-h-screen">
+    <script>
+        // Redirección automática según el rol
+        document.addEventListener('DOMContentLoaded', function() {
+            const rol = localStorage.getItem('rol');
+            if (rol === 'admin') {
+                window.location.href = 'indexadmin.html';
+            }
+        });
+    </script>
+    <header class="flex justify-between items-center m-8 bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 rounded-xl shadow-lg p-6 border border-emerald-700">
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">🏥</span>
+            <h1 class="text-4xl font-bold text-emerald-300 drop-shadow-lg">PetCare</h1>
+        </div>
+        <nav id="menu" class="hidden md:flex md:items-center md:space-x-4">
+            <ul class="flex space-x-4">
+                <li><a href="index.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Inicio</a></li>
+                <li><a href="mascotas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Mis Mascotas</a></li>
+                <li><a href="citas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Agendar Cita</a></li>
+                <li><a href="contacto.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Contacto</a></li>
+            </ul>
+            <button onclick="logout()"
+                class="ml-6 px-4 py-2 bg-gradient-to-r from-red-700 to-red-900 text-white rounded hover:bg-red-800 transition shadow-lg">
+                Cerrar sesión
+            </button>
+            <script>
+                function logout() {
+                    const token = localStorage.getItem('authToken');
+                    if (token) {
+                        fetch('http://127.0.0.1:8000/api/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            }
+                        })
+                        .finally(() => {
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('rol');
+                            window.location.href = 'login.html';
+                        });
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                }
+            </script>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="flex justify-center items-center py-16 mb-9">
+        <section class="text-center max-w-3xl">
+            <h2 class="text-6xl font-bold py-6 text-emerald-200 drop-shadow">Bienvenido a PetCare</h2>
+            <p class="text-2xl text-emerald-300 mb-4">Tu clínica veterinaria de confianza</p>
+            <p class="text-lg text-slate-300">Cuidamos la salud de tus mascotas con profesionalismo y amor</p>
+        </section>
+    </main>
+
+    <!-- Servicios Principales -->
+    <main class="px-4 py-12">
+        <h3 class="text-4xl font-bold text-center text-emerald-300 mb-12">Nuestros Servicios</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            <!-- Consultas -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">🩺</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Consultas</h4>
+                <p class="text-slate-300">Examen general y diagnóstico de tu mascota</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">Desde $50.00</p>
+            </div>
+
+            <!-- Vacunas -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">💉</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Vacunas</h4>
+                <p class="text-slate-300">Esquema completo de vacunación</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">Desde $35.00</p>
+            </div>
+
+            <!-- Cirugía -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">🔬</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Cirugía</h4>
+                <p class="text-slate-300">Procedimientos quirúrgicos especializados</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">Desde $200.00</p>
+            </div>
+
+            <!-- Limpieza Dental -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">🦷</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Dental</h4>
+                <p class="text-slate-300">Limpieza y cuidado dental</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">Desde $75.00</p>
+            </div>
+
+            <!-- Peluquería -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">✂️</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Grooming</h4>
+                <p class="text-slate-300">Peluquería y cuidado estético</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">Desde $60.00</p>
+            </div>
+
+            <!-- Análisis -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">🔍</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Laboratorio</h4>
+                <p class="text-slate-300">Análisis clínicos y pruebas diagnósticas</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">Desde $40.00</p>
+            </div>
+
+            <!-- Emergencias -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">🚑</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Emergencia</h4>
+                <p class="text-slate-300">Atención de emergencia 24/7</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">Desde $150.00</p>
+            </div>
+
+            <!-- Hospitalización -->
+            <div class="bg-slate-900/80 border border-emerald-600 rounded-lg p-6 text-center hover:bg-slate-800 transition shadow-lg">
+                <span class="text-5xl mb-4 block">🏨</span>
+                <h4 class="text-2xl font-bold text-emerald-300 mb-2">Internación</h4>
+                <p class="text-slate-300">Cuidados intensivos y recuperación</p>
+                <p class="text-emerald-400 text-lg font-bold mt-3">$100.00/día</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Call to Action -->
+    <main class="flex justify-center py-12">
+        <div class="bg-gradient-to-r from-emerald-700 to-teal-700 rounded-xl p-10 max-w-2xl text-center border border-emerald-600">
+            <h3 class="text-3xl font-bold text-white mb-4">¿Listo para agendar una cita?</h3>
+            <p class="text-slate-100 mb-6">Nuestro equipo profesional está listo para atender a tu mascota</p>
+            <a href="citas.html" class="inline-block bg-white text-emerald-700 px-8 py-3 rounded-lg font-bold hover:bg-slate-100 transition text-lg">
+                Agendar Cita Ahora
+            </a>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 text-slate-300 py-6 mt-12 px-6 rounded-t-xl shadow-lg text-center border-t border-emerald-700">
+        <p class="mb-2">PetCare - Tu clínica veterinaria de confianza</p>
+        <p>&copy; 2025 Todos los derechos reservados</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

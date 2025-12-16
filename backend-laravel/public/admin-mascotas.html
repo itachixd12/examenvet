@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mascotas Pacientes - PetCare Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white">
+    <!-- Header -->
+    <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl">🐾</div>
+                    <h1 class="text-xl font-bold text-emerald-400">PetCare Admin</h1>
+                </div>
+                <button onclick="logout()" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-sm">Cerrar sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Titulo y Búsqueda -->
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold">🐕 Mascotas Pacientes</h2>
+        </div>
+
+        <!-- Filtros de Búsqueda -->
+        <div class="bg-slate-800 p-4 rounded-lg mb-6 border border-slate-700">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Nombre</label>
+                    <input type="text" id="filtroNombre" placeholder="Buscar por nombre..." class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Especie</label>
+                    <select id="filtroEspecie" class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                        <option value="">Todas</option>
+                        <option value="Perro">🐕 Perro</option>
+                        <option value="Gato">🐈 Gato</option>
+                        <option value="Conejo">🐰 Conejo</option>
+                        <option value="Hamster">🐹 Hamster</option>
+                        <option value="Ave">🐦 Ave</option>
+                        <option value="Reptil">🦎 Reptil</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Propietario</label>
+                    <input type="text" id="filtroPropietario" placeholder="Nombre del dueño..." class="w-full px-3 py-2 bg-slate-700 rounded text-white border border-slate-600">
+                </div>
+            </div>
+            <div class="mt-4">
+                <button onclick="aplicarFiltros()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 rounded font-semibold">🔍 Buscar</button>
+                <button onclick="limpiarFiltros()" class="ml-2 px-6 py-2 bg-slate-700 hover:bg-slate-600 rounded font-semibold">Limpiar</button>
+            </div>
+        </div>
+
+        <!-- Grid de Mascotas -->
+        <div id="gridMascotas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center text-slate-400 py-12">Cargando mascotas...</div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle Mascota -->
+    <div id="modalDetalle" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
+        <div class="bg-slate-800 rounded-lg p-6 w-full max-w-2xl border border-slate-700 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-bold">Detalles de la Mascota</h3>
+                <button onclick="cerrarModal()" class="text-2xl text-slate-400 hover:text-white">✕</button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Foto -->
+                <div id="detalleFoto" class="text-center">
+                    <img id="imgFoto" class="max-h-64 rounded-lg mx-auto" alt="Foto mascota">
+                </div>
+
+                <!-- Info Básica -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm text-slate-400">Nombre</label>
+                        <p id="detalleNombre" class="text-lg font-semibold"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-400">Especie</label>
+                        <p id="detalleEspecie" class="text-lg font-semibold"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-400">Raza</label>
+                        <p id="detalleRaza" class="text-lg font-semibold"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-400">Edad (años)</label>
+                        <p id="detalleEdad" class="text-lg font-semibold"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-400">Peso (kg)</label>
+                        <p id="detallePeso" class="text-lg font-semibold"></p>
+                    </div>
+                    <div>
+                        <label class="text-sm text-slate-400">Propietario</label>
+                        <p id="detallePropietario" class="text-lg font-semibold"></p>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div>
+                    <label class="text-sm text-slate-400">Notas</label>
+                    <p id="detalleNotas" class="text-white bg-slate-700 p-3 rounded"></p>
+                </div>
+
+                <!-- Acciones -->
+                <div class="flex gap-2 pt-4 border-t border-slate-700">
+                    <button onclick="verHistorialMascota()" id="btnHistorial" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded font-semibold">📋 Ver Historial</button>
+                    <button onclick="editarMascota()" id="btnEditar" class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded font-semibold">✏️ Editar</button>
+                    <button onclick="cerrarModal()" class="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded font-semibold">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let mascotasActuales = [];
+        let mascotaSeleccionada = null;
+        const token = localStorage.getItem('authToken');
+
+        const especiesEmoji = {
+            'Perro': '🐕', 'Gato': '🐈', 'Conejo': '🐰',
+            'Hamster': '🐹', 'Ave': '🐦', 'Reptil': '🦎'
+        };
+
+        function cerrarModal() {
+            document.getElementById('modalDetalle').classList.add('hidden');
+            document.getElementById('modalDetalle').classList.remove('flex');
+        }
+
+        function abrirModal(mascota) {
+            mascotaSeleccionada = mascota;
+            document.getElementById('detalleNombre').textContent = mascota.nombre;
+            document.getElementById('detalleEspecie').textContent = (especiesEmoji[mascota.especie] || '') + ' ' + mascota.especie;
+            document.getElementById('detalleRaza').textContent = mascota.raza || 'N/A';
+            document.getElementById('detalleEdad').textContent = mascota.edad || 'N/A';
+            document.getElementById('detallePeso').textContent = mascota.peso || 'N/A';
+            document.getElementById('detalleNotas').textContent = mascota.notas || 'Sin notas';
+            document.getElementById('detallePropietario').textContent = mascota.user?.name || 'N/A';
+            
+            if (mascota.foto) {
+                // Si es URL completa (http o https), úsala directamente. Si no, agrégale el prefijo
+                const fotoUrl = mascota.foto.startsWith('http') ? mascota.foto : 'http://127.0.0.1:8000/uploads/mascotas/' + mascota.foto;
+                document.getElementById('imgFoto').src = fotoUrl;
+                document.getElementById('detalleFoto').style.display = 'block';
+            } else {
+                document.getElementById('detalleFoto').style.display = 'none';
+            }
+
+            document.getElementById('modalDetalle').classList.remove('hidden');
+            document.getElementById('modalDetalle').classList.add('flex');
+        }
+
+        function verHistorialMascota() {
+            if (mascotaSeleccionada) {
+                window.location.href = `historial.html?mascota_id=${mascotaSeleccionada.id}`;
+            }
+        }
+
+        function editarMascota() {
+            alert('Funcionalidad de edición disponible en la sección de Mascotas del usuario');
+            cerrarModal();
+        }
+
+        function mostrarMascotas() {
+            const grid = document.getElementById('gridMascotas');
+            grid.innerHTML = '';
+
+            if (mascotasActuales.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center text-slate-400 py-12">No se encontraron mascotas</div>';
+                return;
+            }
+
+            mascotasActuales.forEach(mascota => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800 rounded-lg border border-slate-700 overflow-hidden hover:border-emerald-500 transition cursor-pointer';
+                card.onclick = () => abrirModal(mascota);
+
+                const emoji = especiesEmoji[mascota.especie] || '🐾';
+                // Si la foto es URL (contiene http o https), úsala directamente. Si no, agrégale el prefijo
+                const fotoUrl = mascota.foto ? (mascota.foto.startsWith('http') ? mascota.foto : 'http://127.0.0.1:8000/uploads/mascotas/' + mascota.foto) : '';
+                const foto = mascota.foto ? `<img src="${fotoUrl}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-slate-700 flex items-center justify-center text-6xl">${emoji}</div>`;
+
+                card.innerHTML = `
+                    ${foto}
+                    <div class="p-4">
+                        <h3 class="text-xl font-bold text-emerald-300">${emoji} ${mascota.nombre}</h3>
+                        <p class="text-sm text-slate-400 mt-1">${mascota.especie}${mascota.raza ? ' - ' + mascota.raza : ''}</p>
+                        <p class="text-xs text-slate-500 mt-2">👤 ${mascota.user?.name || 'Desconocido'}</p>
+                        <div class="mt-3 flex gap-2 text-xs text-slate-300">
+                            <span>📅 ${mascota.edad || '?'} años</span>
+                            <span>⚖️ ${mascota.peso || '?'} kg</span>
+                        </div>
+                        <button onclick="event.stopPropagation(); abrirModal(mascota)" class="mt-4 w-full px-3 py-2 bg-emerald-600 hover:bg-emerald-700 rounded text-sm font-semibold">
+                            Ver Detalles
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        async function aplicarFiltros() {
+            const nombre = document.getElementById('filtroNombre').value;
+            const especie = document.getElementById('filtroEspecie').value;
+            const propietario = document.getElementById('filtroPropietario').value;
+
+            const datos = {};
+            if (nombre) datos.nombre = nombre;
+            if (especie) datos.especie = especie;
+            if (propietario) datos.propietario = propietario;
+
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/admin/mascotas/buscar', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                if (resp.ok) {
+                    const result = await resp.json();
+                    mascotasActuales = result.data || result;
+                    mostrarMascotas();
+                } else {
+                    alert('Error al buscar mascotas');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión');
+            }
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroNombre').value = '';
+            document.getElementById('filtroEspecie').value = '';
+            document.getElementById('filtroPropietario').value = '';
+            cargarMascotas();
+        }
+
+        async function cargarMascotas() {
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/admin/mascotas-global', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (resp.ok) {
+                    const result = await resp.json();
+                    mascotasActuales = result.data || result;
+                    mostrarMascotas();
+                } else {
+                    document.getElementById('gridMascotas').innerHTML = '<div class="col-span-full text-center text-red-400 py-12">Error al cargar mascotas</div>';
+                }
+            } catch (error) {
+                console.error('Error al cargar mascotas:', error);
+                document.getElementById('gridMascotas').innerHTML = '<div class="col-span-full text-center text-red-400 py-12">Error de conexión</div>';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            window.location.href = 'login.html';
+        }
+
+        window.addEventListener('load', cargarMascotas);
+    </script>
+</body>
+</html>

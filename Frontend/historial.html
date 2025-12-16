@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial Médico - PetCare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-slate-950 via-emerald-900 to-teal-800 text-slate-100 min-h-screen">
+    <header class="flex justify-between items-center m-8 bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 rounded-xl shadow-lg p-6 border border-emerald-700">
+        <div class="flex items-center gap-3">
+            <span class="text-3xl">🏥</span>
+            <h1 class="text-3xl font-bold text-emerald-300 drop-shadow-lg">PetCare</h1>
+        </div>
+        <nav class="hidden md:flex md:items-center md:space-x-4">
+            <ul class="flex space-x-4">
+                <li><a href="index.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Inicio</a></li>
+                <li><a href="mascotas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Mis Mascotas</a></li>
+                <li><a href="citas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Agendar Cita</a></li>
+                <li><a href="contacto.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Contacto</a></li>
+            </ul>
+            <button onclick="logout()" class="ml-6 px-4 py-2 bg-gradient-to-r from-red-700 to-red-900 text-white rounded hover:bg-red-800 transition shadow-lg">Cerrar sesión</button>
+        </nav>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-4xl font-bold text-emerald-300 drop-shadow">Historial Médico</h2>
+            <a href="mascotas.html" class="px-4 py-2 bg-slate-700 text-white rounded hover:bg-slate-600 transition">Volver a Mascotas</a>
+        </div>
+
+        <!-- Selector de Mascota -->
+        <div class="mb-8">
+            <label class="block text-slate-300 mb-2 font-semibold">Selecciona una mascota:</label>
+            <select id="mascota-select" class="w-full px-4 py-3 rounded bg-slate-800 text-white border border-emerald-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                <option value="">Cargando mascotas...</option>
+            </select>
+        </div>
+
+        <!-- Información de la Mascota -->
+        <div id="mascota-info" class="bg-slate-900/80 border border-emerald-600 rounded-lg p-8 mb-8 hidden">
+            <h3 class="text-2xl font-bold text-emerald-300 mb-4">Información de la Mascota</h3>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-slate-400">Especie:</p>
+                    <p id="info-especie" class="text-white font-semibold">-</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Raza:</p>
+                    <p id="info-raza" class="text-white font-semibold">-</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Edad:</p>
+                    <p id="info-edad" class="text-white font-semibold">-</p>
+                </div>
+                <div>
+                    <p class="text-slate-400">Peso:</p>
+                    <p id="info-peso" class="text-white font-semibold">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="flex gap-4 mb-6">
+            <input type="text" id="buscar-historial" placeholder="Buscar en historial..." 
+                class="flex-1 px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 placeholder-slate-400">
+            <select id="filtro-tipo" class="px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500">
+                <option value="">Todos los tipos</option>
+                <option value="Consulta">Consulta</option>
+                <option value="Vacunación">Vacunación</option>
+                <option value="Cirugía">Cirugía</option>
+                <option value="Análisis">Análisis</option>
+                <option value="Medicamento">Medicamento</option>
+            </select>
+        </div>
+
+        <!-- Timeline del Historial -->
+        <div id="historial-contenedor" class="space-y-4">
+            <p class="text-slate-400 text-center py-8">Selecciona una mascota para ver su historial</p>
+        </div>
+    </main>
+
+    <footer class="bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 text-slate-300 py-6 mt-12 px-6 rounded-t-xl shadow-lg text-center border-t border-emerald-700">
+        <p class="mb-2">PetCare - Tu clínica veterinaria de confianza</p>
+        <p>&copy; 2025 Todos los derechos reservados</p>
+    </footer>
+
+    <script src="historial.js"></script>
+    <script>
+        function logout() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                fetch('http://127.0.0.1:8000/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    }
+                })
+                .finally(() => {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('rol');
+                    window.location.href = 'login.html';
+                });
+            } else {
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

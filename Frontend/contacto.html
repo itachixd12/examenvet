@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto - PetCare Clínica Veterinaria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-b from-slate-950 via-emerald-900 to-teal-800 text-slate-100 min-h-screen">
+    <header class="flex justify-between items-center m-8 bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 rounded-xl shadow-lg p-6 border border-emerald-700">
+        <div class="flex items-center gap-3">
+            <span class="text-4xl">🏥</span>
+            <h1 class="text-4xl font-bold text-emerald-300 drop-shadow-lg">PetCare</h1>
+        </div>
+        <nav id="menu" class="hidden md:flex md:items-center md:space-x-4">
+            <ul class="flex space-x-4">
+                <li><a href="index.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Inicio</a></li>
+                <li><a href="mascotas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Mis Mascotas</a></li>
+                <li><a href="citas.html" class="text-slate-100 hover:text-emerald-400 transition font-semibold">Agendar Cita</a></li>
+                <li><a href="contacto.html" class="text-emerald-300 font-semibold">Contacto</a></li>
+            </ul>
+            <button onclick="logout()"
+                class="ml-6 px-4 py-2 bg-gradient-to-r from-red-700 to-red-900 text-white rounded hover:bg-red-800 transition shadow-lg">
+                Cerrar sesión
+            </button>
+            <script>
+                function logout() {
+                    const token = localStorage.getItem('authToken');
+                    if (token) {
+                        fetch('http://127.0.0.1:8000/api/logout', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            }
+                        })
+                        .finally(() => {
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('rol');
+                            window.location.href = 'login.html';
+                        });
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                }
+            </script>
+        </nav>
+    </header>
+
+    <main class="flex flex-col items-center justify-center py-8 mb-9">
+        <!-- Información de Contacto -->
+        <section class="mb-8 bg-slate-900/80 border border-emerald-600 rounded-xl shadow-lg p-8 w-full max-w-3xl">
+            <h2 class="text-4xl font-bold mb-4 text-emerald-300 drop-shadow">Contáctanos</h2>
+            <p class="text-xl text-emerald-200 mb-6">Clínica Veterinaria PetCare - Cuidamos de tus mascotas</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">📍 Dirección</p>
+                    <p class="text-slate-200">Calle Principal 123, Sector Centro</p>
+                    <p class="text-slate-200">Sangolqui, Pichincha</p>
+                </div>
+
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">📧 Email</p>
+                    <p class="text-slate-200">info@petcare.com</p>
+                    <p class="text-slate-200">emergencias@petcare.com</p>
+                </div>
+
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">📞 Teléfono</p>
+                    <p class="text-slate-200">0992892379</p>
+                    <p class="text-slate-200">0960790067 (Emergencias)</p>
+                </div>
+
+                <div class="border-l-4 border-emerald-500 pl-4">
+                    <p class="font-semibold text-emerald-400 mb-1">🕒 Horario de Atención</p>
+                    <p class="text-slate-200">Lun-Vie: 08:00 - 19:00</p>
+                    <p class="text-slate-200">Sáb-Dom: 09:00 - 17:00</p>
+                </div>
+            </div>
+
+            <!-- Formulario de Contacto -->
+            <hr class="my-8 border-emerald-700">
+            
+            <h3 class="text-2xl font-bold text-emerald-300 mb-4">Envíanos un Mensaje</h3>
+            <form id="form-contacto" class="space-y-4">
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Nombre</label>
+                    <input type="text" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Email</label>
+                    <input type="email" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Asunto</label>
+                    <input type="text" required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-slate-300 mb-2 font-semibold">Mensaje</label>
+                    <textarea required class="w-full px-4 py-2 rounded bg-slate-800 text-white border border-slate-600 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500" rows="5"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-bold text-lg">
+                    Enviar Mensaje
+                </button>
+            </form>
+        </section>
+
+        <!-- Mapa -->
+        <section id="map" class="shadow-lg rounded-lg w-full max-w-3xl border border-emerald-600"></section>
+    </main>
+
+    <footer class="bg-gradient-to-r from-slate-950 via-emerald-900 to-teal-800 text-slate-300 py-6 mt-12 px-6 rounded-t-xl shadow-lg text-center border-t border-emerald-700">
+        <p class="mb-2">PetCare - Tu clínica veterinaria de confianza</p>
+        <p>&copy; 2025 Todos los derechos reservados</p>
+    </footer>
+   
+</body>
+
+</html>
